@@ -42,6 +42,22 @@ from charmhelpers.contrib.openstack.utils import (
 )
 
 
+class MiddlewareContext(context.OSContextGenerator):
+     interfaces = ['keystone-middleware']
+     log("Get relation middleware!", level='DEBUG')
+     def __call__(self):
+        ctxt = {}
+        for rid in relation_ids('keystone-middleware'):
+            if related_units(rid):
+                for unit in related_units(rid):
+                    rdata = relation_get(rid=rid, unit=unit)
+                    ctxt['enable_middleware'] = True
+                    ctxt['methods'] = rdata.get('methods')
+                    ctxt['external'] = rdata.get('external')
+                    ctxt['simple_token_secret'] = rdata.get('simple_token_secret')
+                    ctxt['simple_token_header'] = rdata.get('simple_token_header')
+        return ctxt
+
 class ApacheSSLContext(context.ApacheSSLContext):
     interfaces = ['https']
     external_ports = []

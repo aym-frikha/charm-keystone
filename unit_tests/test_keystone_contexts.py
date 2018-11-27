@@ -439,3 +439,56 @@ class TestKeystoneContexts(CharmTestCase):
 
         self.maxDiff = None
         self.assertCountEqual(ctxt(), {})
+
+    @patch.object(context, 'relation_ids')
+    def test_middleware_no_related_units(self, mock_relation_ids):
+        os.environ['JUJU_UNIT_NAME'] = 'keystone'
+
+        def relation_ids_side_effect(rname):
+            return {
+                'keystone-middleware': {}
+            }[rname]
+
+        mock_relation_ids.side_effect = relation_ids_side_effect
+        ctxt = context.MiddlewareContext()
+
+        self.assertEqual(ctxt(), {})
+
+    @patch.object(context, 'relation_ids')
+    @patch.object(context, 'related_units')
+    @patch.object(context, 'relation_get')
+    def test_middleware_related_units(
+            self, mock_relation_get, mock_related_units, mock_relation_ids):
+        os.environ['JUJU_UNIT_NAME'] = 'keystone'
+
+        def relation_ids_side_effect(rname):
+            return {
+                'keystone-middleware': {
+                    'keystone-middleware:0',
+                }
+            }[rname]
+
+        mock_relation_ids.side_effect = relation_ids_side_effect
+
+        def related_units_side_effect(rid):
+            return {
+                'keystone-middleware:0': ['keystone-middleware/0'],
+            }[rid]
+
+        mock_related_units.side_effect = related_units_side_effect
+
+        def relation_get_side_effect(unit, rid):
+            return {
+                "keystone-middleware:0": {
+                    "keystone-middleware/0": {
+                        "token-secret": 'foo',
+                    },
+                },
+            }[rid][unit]
+
+        mock_relation_get.side_effect = relation_get_side_effect
+        ctxt = context.MiddlewareContext()
+
+
+        self.assertEqual(
+            ctxt(), {'enable_ico': True, 'ico_token_secret': 'foo'})

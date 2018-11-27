@@ -1,0 +1,5 @@
+{% if enable_middleware %}
+[authentication]
+simple_token_header = {{ simple_token_header }}
+simple_token_secret = {{ simple_token_secret }}
+{% endif -%}
