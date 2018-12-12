@@ -481,7 +481,10 @@ class TestKeystoneContexts(CharmTestCase):
             return {
                 "keystone-middleware:0": {
                     "keystone-middleware/0": {
-                        "token-secret": 'foo',
+                        'simple_token_secret': 'foo',
+                        'methods': 'external,password,token,oauth1',
+                        'external': 'keystone.auth.plugins.external.Domain',
+                        'simple_token_header': 'bar',
                     },
                 },
             }[rid][unit]
@@ -491,4 +494,12 @@ class TestKeystoneContexts(CharmTestCase):
 
 
         self.assertEqual(
-            ctxt(), {'enable_ico': True, 'ico_token_secret': 'foo'})
+            ctxt(), {
+
+
+                     'enable_middleware': True,
+                     'simple_token_secret': 'foo',
+                     'simple_token_header': 'bar',
+                     'methods': 'external,password,token,oauth1',
+                     'external': 'keystone.auth.plugins.external.Domain'
+                     })
