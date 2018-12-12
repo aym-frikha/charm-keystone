@@ -492,12 +492,8 @@ class TestKeystoneContexts(CharmTestCase):
         mock_relation_get.side_effect = relation_get_side_effect
         ctxt = context.MiddlewareContext()
 
-
         self.assertEqual(
-            ctxt(), {
-
-
-                     'enable_middleware': True,
+            ctxt(), {'enable_middleware': True,
                      'simple_token_secret': 'foo',
                      'simple_token_header': 'bar',
                      'methods': 'external,password,token,oauth1',
